@@ -1,12 +1,6 @@
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-#include<unordered_map>
-#include<unordered_set>
+#include <bits/stdc++.h>
 
 using namespace std;
-
-unordered_map<int, unordered_set<int> > vertices;
 
 int roundUp(int x) {
 	if ( x < 0 ) return 0;

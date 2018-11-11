@@ -20,8 +20,7 @@ struct MinHeap
 
 struct MinHeapNode *newMinHeapNode(int v, int dist)
 {
-    struct MinHeapNode *minHeapNode =
-        (struct MinHeapNode *)malloc(sizeof(struct MinHeapNode));
+    struct MinHeapNode *minHeapNode = (struct MinHeapNode *)malloc(sizeof(struct MinHeapNode));
     minHeapNode->v = v;
     minHeapNode->dist = dist;
     return minHeapNode;
