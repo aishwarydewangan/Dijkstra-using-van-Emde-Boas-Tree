@@ -2,11 +2,6 @@
 
 using namespace std;
 
-vector<int> *shortest_order;
-int *distance_to_dest;
-int num_vertices;
-
-
 struct fibonacci_node {
 	int degree;                 
 	fibonacci_node *parent;     
@@ -21,7 +16,7 @@ struct fibonacci_node {
 struct fibonacci_heap {
 
 	fibonacci_node *min_node;
-	
+
 	int num_nodes;
 
 	fibonacci_heap()
@@ -31,7 +26,7 @@ struct fibonacci_heap {
 	}
 };
 
-void fib_heap_insert(fibonacci_heap *fib_heap_obj, fibonacci_node *new_node, int key) {
+void insert(fibonacci_heap *fib_heap_obj, fibonacci_node *new_node, int key) {
 
 	fibonacci_node *min_node = fib_heap_obj->min_node;
 	new_node->key = key;
@@ -56,11 +51,11 @@ void fib_heap_insert(fibonacci_heap *fib_heap_obj, fibonacci_node *new_node, int
 	fib_heap_obj->num_nodes = fib_heap_obj->num_nodes + 1;
 }
 
-void fib_heap_existing_to_root(fibonacci_heap *fib_heap_obj, fibonacci_node *new_node) {
+void existing_to_root(fibonacci_heap *fib_heap_obj, fibonacci_node *new_node) {
 
 	fibonacci_node *min_node = fib_heap_obj->min_node;
-	new_node->parent = NULL;  //Updating the parent pointer to null.
-	new_node->mark = false;   //Setting the mark value of the node to false.
+	new_node->parent = NULL;  
+	new_node->mark = false;   
 
 	if (min_node != NULL) {
 		fibonacci_node* min_left_temp = min_node->left;
@@ -79,7 +74,7 @@ void fib_heap_existing_to_root(fibonacci_heap *fib_heap_obj, fibonacci_node *new
 	}
 }
 
-void fib_heap_add_child(fibonacci_node *parent_node, fibonacci_node *new_child_node) {
+void add_child(fibonacci_node *parent_node, fibonacci_node *new_child_node) {
 
 	if (parent_node->degree == 0) {
 		parent_node->child = new_child_node;
@@ -98,7 +93,7 @@ void fib_heap_add_child(fibonacci_node *parent_node, fibonacci_node *new_child_n
 	parent_node->degree = parent_node->degree + 1;
 }
 
-void fib_heap_remove_node_from_root(fibonacci_node *node) {
+void remove_node_from_root(fibonacci_node *node) {
 
 	if (node->right != node) {
 		node->right->left = node->left;
@@ -116,15 +111,15 @@ void fib_heap_remove_node_from_root(fibonacci_node *node) {
 	}
 }
 
-void fib_heap_link(fibonacci_heap *heap_inst, fibonacci_node *high_node, fibonacci_node *low_node) {
+void link(fibonacci_heap *heap_inst, fibonacci_node *high_node, fibonacci_node *low_node) {
 
-	fib_heap_remove_node_from_root(high_node);
-	fib_heap_add_child(low_node, high_node);
+	remove_node_from_root(high_node);
+	add_child(low_node, high_node);
 	high_node->mark = false;
 
 }
 
-void fib_heap_consolidate(fibonacci_heap *heap_inst) {
+void consolidate(fibonacci_heap *heap_inst) {
 
 	int node_degree;
 	int count = 0, root_count = 0; 
@@ -132,12 +127,10 @@ void fib_heap_consolidate(fibonacci_heap *heap_inst) {
 	if (heap_inst->num_nodes > 1) { 
 		int degree_table_size = heap_inst->num_nodes;
 		vector<fibonacci_node*> degree_table; 
-		fibonacci_node *current_node = heap_inst->min_node, *start_node =
-				heap_inst->min_node;
+		fibonacci_node *current_node = heap_inst->min_node, *start_node = heap_inst->min_node;
 		fibonacci_node *existing_node_degree_array, *current_consolidating_node;
 
-		fibonacci_node *temp_node = heap_inst->min_node, *iterating_node =
-				heap_inst->min_node;
+		fibonacci_node *temp_node = heap_inst->min_node, *iterating_node = heap_inst->min_node;
 		do {
 			root_count++;
 			iterating_node = iterating_node->right;
@@ -164,7 +157,7 @@ void fib_heap_consolidate(fibonacci_heap *heap_inst) {
 					}
 					if (existing_node_degree_array == current_consolidating_node)
 						break;
-					fib_heap_link(heap_inst, existing_node_degree_array, current_consolidating_node);
+					link(heap_inst, existing_node_degree_array, current_consolidating_node);
 					degree_table[node_degree] = NULL;
 					node_degree++;
 				}
@@ -175,15 +168,15 @@ void fib_heap_consolidate(fibonacci_heap *heap_inst) {
 		heap_inst->min_node = NULL;
 		for (int i = 0; i < degree_table.size(); i++) {
 			if (degree_table[i] != NULL) {
-				fib_heap_existing_to_root(heap_inst, degree_table[i]);
+				existing_to_root(heap_inst, degree_table[i]);
 			}
 		}
 	}
 }
 
-fibonacci_node *fib_heap_extract_min(fibonacci_heap *heap_inst) {
+fibonacci_node *extract_min(fibonacci_heap *heap) {
 
-	fibonacci_node *min_node = heap_inst->min_node;
+	fibonacci_node *min_node = heap->min_node;
 
 	if (min_node != NULL) {
 		int degree = min_node->degree;
@@ -193,19 +186,19 @@ fibonacci_node *fib_heap_extract_min(fibonacci_heap *heap_inst) {
 		while (count < degree) {
 			removed_child = current_child;
 			current_child = current_child->right;
-			fib_heap_existing_to_root(heap_inst, removed_child);
+			existing_to_root(heap, removed_child);
 			count++;
 		}
-		fib_heap_remove_node_from_root(min_node);
-		heap_inst->num_nodes = heap_inst->num_nodes - 1;
-		if (heap_inst->num_nodes == 0) {
-			heap_inst->min_node = NULL;
+		remove_node_from_root(min_node);
+		heap->num_nodes = heap->num_nodes - 1;
+		if (heap->num_nodes == 0) {
+			heap->min_node = NULL;
 		} else { 
-			heap_inst->min_node = min_node->right; 
+			heap->min_node = min_node->right; 
 			fibonacci_node *min_node_left_temp = min_node->left;
-			heap_inst->min_node->left = min_node_left_temp;
-			min_node_left_temp->right = heap_inst->min_node;
-			fib_heap_consolidate(heap_inst);
+			heap->min_node->left = min_node_left_temp;
+			min_node_left_temp->right = heap->min_node;
+			consolidate(heap);
 		}
 	}
 	return min_node;
@@ -242,9 +235,9 @@ int main(int argc, char *argv[]) {
 	fibonacci_heap *heap = new fibonacci_heap;
 	fibonacci_node *node = new fibonacci_node;
 	fibonacci_node *minimum;
-	fib_heap_insert(heap, node, 0);
+	insert(heap, node, 0);
 
-	minimum = fib_heap_extract_min(heap);
+	minimum = extract_min(heap);
 
 	while(minimum != NULL) {
 
@@ -264,13 +257,13 @@ int main(int argc, char *argv[]) {
 				if(dist[v] > dist[u] + w) {
 					dist[v] = dist[u] + w;
 					node = new fibonacci_node;
-					fib_heap_insert(heap, node, dist[v]);
+					insert(heap, node, dist[v]);
 					distList[dist[v]].push_back(v);
 				}
 			}
 		}
 
-		minimum = fib_heap_extract_min(heap);
+		minimum = extract_min(heap);
 	}
 
 
